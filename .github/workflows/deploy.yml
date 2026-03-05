@@ -1,34 +1,42 @@
-name: Deploy to AWS ECS
+name: Deploy to ECS
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Configure AWS
+    - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-        aws-region: us-east-1
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Login to ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build Docker image
+    - name: Build image
+      run: docker build -t app .
+
+    - name: Tag image
       run: |
-        docker build -t excel-service .
-        docker tag excel-service:latest ${{ steps.login-ecr.outputs.registry }}/excel-service:latest
+        docker tag app:latest ${{ steps.login-ecr.outputs.registry }}/krithika-excel-service:latest
 
     - name: Push image
       run: |
-        docker push ${{ steps.login-ecr.outputs.registry }}/excel-service:latest
+        docker push ${{ steps.login-ecr.outputs.registry }}/krithika-excel-service:latest
+
+    - name: Deploy ECS
+      run: |
+        aws ecs update-service \
+          --cluster excel-cluster \
+          --service excel-task-service \
+          --force-new-deployment
