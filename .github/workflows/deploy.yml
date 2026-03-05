@@ -39,5 +39,5 @@ jobs:
         aws ecs update-service \
           --cluster excel-cluster \
           --service excel-task-service-cmegjut1 \
-          --force-new-deployment
+          --force-new-deployment \
           --region ap-south-1
