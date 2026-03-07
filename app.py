@@ -1,13 +1,10 @@
-from flask import Flask, jsonify
-import pandas as pd
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
-@app.route("/")
-def read_excel():
-    df = pd.read_excel("data.xlsx")
-    return df.to_json(orient="records")
+@app.route('/')
+def home():
+    return render_template("horror.html")
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000) 
-
+if __name__ == "_main_":
+    app.run(host="0.0.0.0", port=5000)
